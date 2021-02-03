@@ -25,6 +25,19 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+typedef struct {
+	unsigned char data;
+	unsigned int delay ;
+} PATTERN_STRUCT;
+
+
+PATTERN_STRUCT pattern[] = {
+	{0b10000001, 100}, {0b01000010, 100}, {0b00100100, 100}, {0b00011000, 100},
+	{0b00011000, 100}, {0b00100100, 100}, {0b01000010, 100}, {0b10000001, 100},
+	{0b00000011, 200}, {0b00001100, 200}, {0b00110000, 200}, {0b11000000, 200},
+	{0b00000000, 0}
+};
+
 
 /******************************************************************/
 void wait( int ms )
@@ -55,14 +68,21 @@ Version :    	DMK, Initial code
 *******************************************************************/
 {
 	
-	DDRD = 0b11000000;			// All pins PORTD are set to output 
+	DDRD = 0b11111111;			// All pins PORTD are set to output 
 	
 	while (1)
 	{
-		PORTD = 0b10000000;			// Write 10101010b PORTD
-		wait( 500 );				
-		PORTD = 0b01000000;			// Write 01010101b PORTD
-		wait( 500 );				
+		// Set index to begin of pattern array
+		int index = 0;
+		// as long as delay has meaningful content
+		while( pattern[index].delay != 0 ) {
+			// Write data to PORTD
+			PORTD = pattern[index].data;
+			// wait
+			wait(pattern[index].delay);
+			// increment for next round
+			index++;
+		}
 	}
 
 	return 1;

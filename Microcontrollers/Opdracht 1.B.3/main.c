@@ -55,14 +55,20 @@ Version :    	DMK, Initial code
 *******************************************************************/
 {
 	
-	DDRD = 0b11000000;			// All pins PORTD are set to output 
+	DDRD = 0b10000000;			// All pins PORTD are set to output 
 	
 	while (1)
 	{
-		PORTD = 0b10000000;			// Write 10101010b PORTD
-		wait( 500 );				
-		PORTD = 0b01000000;			// Write 01010101b PORTD
-		wait( 500 );				
+		if(PINC & 0x01){
+			PORTD = 0b10000000;
+			wait(500);
+			PORTD = 0x00;
+			wait(500);
+		}
+		else{
+			PORTD = 0x00;
+		}
+
 	}
 
 	return 1;

@@ -25,7 +25,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-
 /******************************************************************/
 void wait( int ms )
 /* 
@@ -55,14 +54,18 @@ Version :    	DMK, Initial code
 *******************************************************************/
 {
 	
-	DDRD = 0b11000000;			// All pins PORTD are set to output 
+	DDRD = 0b11111111;			// All pins PORTD are set to output 
 	
 	while (1)
 	{
-		PORTD = 0b10000000;			// Write 10101010b PORTD
-		wait( 500 );				
-		PORTD = 0b01000000;			// Write 01010101b PORTD
-		wait( 500 );				
+		for(int i = 0; i < 8; i++){
+			PORTD = 0x01 << i;
+			wait(50);
+		}
+		for(int i = 7; i > 0; i--){
+			PORTD = 0x01 << i;
+			wait(50);
+		}
 	}
 
 	return 1;
