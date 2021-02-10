@@ -58,11 +58,12 @@ Version :    	DMK, Initial code
 	
 	while (1)
 	{
-		for(int i = 0; i < 8; i++){
-			PORTD = 0x01 << i;
-			wait(50);
+		for(int i = 0; i < 8; i++){ // A for loop to go through all the possible LEDs in PORTD. 
+			PORTD = 0x01 << i;		// bit shift a specific amount to go to a specific LED
+			wait(50);				// Wait half a second
 		}
-		for(int i = 7; i > 0; i--){
+		
+		for(int i = 7; i > 0; i--){	// this section does the same the for loop above. But this one does the reverse order. So the LED goes back and forth.
 			PORTD = 0x01 << i;
 			wait(50);
 		}
