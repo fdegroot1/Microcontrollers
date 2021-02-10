@@ -26,8 +26,8 @@
 #include <util/delay.h>
 
 typedef struct {
-	unsigned char data;
-	unsigned int delay ;
+	unsigned char data;		// contains the bits that are on.
+	unsigned int delay ;	// contains the delay time for that moment
 } PATTERN_STRUCT;
 
 
