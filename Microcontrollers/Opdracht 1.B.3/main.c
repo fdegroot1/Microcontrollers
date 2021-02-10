@@ -62,10 +62,10 @@ Version :    	DMK, Initial code
 		if(PINC & 0x01){		// Check if the button is pressed.
 			PORTD = 0b10000000; // Sets the value to the 8th LED, the value is 1 only on the 8th LED which means that the LED is on.
 			wait(500);			// Waits half a second.
-			PORTD = 0x00;		// Sets the value to all of the LED, the value of 0 which means that all of the LED are off.
+			PORTD = 0x00;		// Sets the value to all of the LED, the value of 0 which means that all of the LEDs are off.
 			wait(500);			// Waits half a second
 		}
-		else{
+		else{					// if the button is not pressed or hold, all of the lamps get the value of 0 which means that all of the LEDs are off.
 			PORTD = 0x00;
 		}
 
