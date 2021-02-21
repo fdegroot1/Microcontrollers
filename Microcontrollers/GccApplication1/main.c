@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 
-const unsigned char Numbers [10] = {
+const unsigned char Numbers [16] = {
 	//	  dPgfe dcba
 	0b00111111,		// 0
 	0b00000110,		// 1
@@ -25,6 +25,12 @@ const unsigned char Numbers [10] = {
 	0b00000111,		// 7
 	0b01111111,		// 8
 	0b01101111,		// 9
+	0b01110111,		// A
+	0b01111100,		// b
+	0b00111001,		// C
+	0b01011110,		// d
+	0b01111001,		// E
+	0b01110001,		// F
 };
 
 
@@ -37,25 +43,26 @@ int main(void)
 	DDRC = 0x00;
 	
 	display(0);
+	
     while (1) 
     {
-		//display(number);
-		//number++;
-		//wait(1000);
-		//if(number > 9){
-			//number = 0;
-		//}
+		wait(200);
+		
 		if(PINC & 0x01){
 			number++;
+			if(number >= 16){
+				number = 0;
+			}
 			display(number);
-			wait(500);
 		}
-		else if(PINC & 0x02){
+		
+		if(PINC & 0x02){
 			number--;
+			if(number < 0){
+				number = 0;
+			}
 			display(number);
-			wait(500);
 		}
-
 		
 		
     }

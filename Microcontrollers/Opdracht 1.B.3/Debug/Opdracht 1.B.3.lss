@@ -21,11 +21,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   8 .debug_frame  00000034  00000000  00000000  000015c4  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000465  00000000  00000000  000015f8  2**0
+  9 .debug_str    0000042e  00000000  00000000  000015f8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000006a  00000000  00000000  00001a5d  2**0
+ 10 .debug_loc    0000006a  00000000  00000000  00001a26  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000018  00000000  00000000  00001ac7  2**0
+ 11 .debug_ranges 00000018  00000000  00000000  00001a90  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -160,25 +160,25 @@ Version :    	DMK, Initial code
 	
 	while (1)
 	{
-		if(PINC & 0x01){
+		if(PINC & 0x01){		// Check if the button is pressed.
   c0:	98 9b       	sbis	0x13, 0	; 19
   c2:	0a c0       	rjmp	.+20     	; 0xd8 <main+0x1c>
-			PORTD = 0b10000000;
+			PORTD = 0b10000000; // Sets the value to the 8th LED, the value is 1 only on the 8th LED which means that the LED is on.
   c4:	80 e8       	ldi	r24, 0x80	; 128
   c6:	82 bb       	out	0x12, r24	; 18
-			wait(500);
+			wait(500);			// Waits half a second.
   c8:	84 ef       	ldi	r24, 0xF4	; 244
   ca:	91 e0       	ldi	r25, 0x01	; 1
   cc:	e8 df       	rcall	.-48     	; 0x9e <wait>
-			PORTD = 0x00;
+			PORTD = 0x00;		// Sets the value to all of the LED, the value of 0 which means that all of the LEDs are off.
   ce:	12 ba       	out	0x12, r1	; 18
-			wait(500);
+			wait(500);			// Waits half a second
   d0:	84 ef       	ldi	r24, 0xF4	; 244
   d2:	91 e0       	ldi	r25, 0x01	; 1
   d4:	e4 df       	rcall	.-56     	; 0x9e <wait>
   d6:	f4 cf       	rjmp	.-24     	; 0xc0 <main+0x4>
 		}
-		else{
+		else{					// if the button is not pressed or hold, all of the lamps get the value of 0 which means that all of the LEDs are off.
 			PORTD = 0x00;
   d8:	12 ba       	out	0x12, r1	; 18
   da:	f2 cf       	rjmp	.-28     	; 0xc0 <main+0x4>
