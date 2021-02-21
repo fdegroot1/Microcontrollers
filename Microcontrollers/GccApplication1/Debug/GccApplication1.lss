@@ -3,29 +3,29 @@ GccApplication1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         0000000a  00800100  0000011a  0000018e  2**0
+  0 .data         00000010  00800100  00000122  00000196  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000011a  00000000  00000000  00000074  2**1
+  1 .text         00000122  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000198  2**0
+  2 .comment      00000030  00000000  00000000  000001a6  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000001c8  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000001d8  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000030  00000000  00000000  00000204  2**0
+  4 .debug_aranges 00000030  00000000  00000000  00000214  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000a0a  00000000  00000000  00000234  2**0
+  5 .debug_info   000009d2  00000000  00000000  00000244  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000089d  00000000  00000000  00000c3e  2**0
+  6 .debug_abbrev 0000089d  00000000  00000000  00000c16  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000305  00000000  00000000  000014db  2**0
+  7 .debug_line   00000317  00000000  00000000  000014b3  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000044  00000000  00000000  000017e0  2**2
+  8 .debug_frame  00000044  00000000  00000000  000017cc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000048c  00000000  00000000  00001824  2**0
+  9 .debug_str    00000455  00000000  00000000  00001810  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000000cc  00000000  00000000  00001cb0  2**0
+ 10 .debug_loc    000000cc  00000000  00000000  00001c65  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000020  00000000  00000000  00001d7c  2**0
+ 11 .debug_ranges 00000020  00000000  00000000  00001d31  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -114,18 +114,18 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	ea e1       	ldi	r30, 0x1A	; 26
+  9e:	e2 e2       	ldi	r30, 0x22	; 34
   a0:	f1 e0       	ldi	r31, 0x01	; 1
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
   a6:	02 c0       	rjmp	.+4      	; 0xac <__do_copy_data+0x14>
   a8:	07 90       	elpm	r0, Z+
   aa:	0d 92       	st	X+, r0
-  ac:	aa 30       	cpi	r26, 0x0A	; 10
+  ac:	a0 31       	cpi	r26, 0x10	; 16
   ae:	b1 07       	cpc	r27, r17
   b0:	d9 f7       	brne	.-10     	; 0xa8 <__do_copy_data+0x10>
   b2:	17 d0       	rcall	.+46     	; 0xe2 <main>
-  b4:	30 c0       	rjmp	.+96     	; 0x116 <_exit>
+  b4:	34 c0       	rjmp	.+104    	; 0x11e <_exit>
 
 000000b6 <__bad_interrupt>:
   b6:	a4 cf       	rjmp	.-184    	; 0x0 <__vectors>
@@ -201,41 +201,52 @@ int main(void)
 	int number = 0;
   ee:	c0 e0       	ldi	r28, 0x00	; 0
   f0:	d0 e0       	ldi	r29, 0x00	; 0
-		//number++;
-		//wait(1000);
-		//if(number > 9){
-			//number = 0;
-		//}
+	
+	display(0);
+	
+    while (1) 
+    {
+		wait(200);
+  f2:	88 ec       	ldi	r24, 0xC8	; 200
+  f4:	90 e0       	ldi	r25, 0x00	; 0
+  f6:	e0 df       	rcall	.-64     	; 0xb8 <wait>
+		
 		if(PINC & 0x01){
-  f2:	98 9b       	sbis	0x13, 0	; 19
-  f4:	07 c0       	rjmp	.+14     	; 0x104 <main+0x22>
+  f8:	98 9b       	sbis	0x13, 0	; 19
+  fa:	08 c0       	rjmp	.+16     	; 0x10c <main+0x2a>
 			number++;
-  f6:	21 96       	adiw	r28, 0x01	; 1
+  fc:	21 96       	adiw	r28, 0x01	; 1
+			if(number >= 16){
+  fe:	c0 31       	cpi	r28, 0x10	; 16
+ 100:	d1 05       	cpc	r29, r1
+ 102:	14 f0       	brlt	.+4      	; 0x108 <main+0x26>
+				number = 0;
+ 104:	c0 e0       	ldi	r28, 0x00	; 0
+			}
 			display(number);
-  f8:	ce 01       	movw	r24, r28
-  fa:	ed df       	rcall	.-38     	; 0xd6 <display>
-			wait(500);
-  fc:	84 ef       	ldi	r24, 0xF4	; 244
-  fe:	91 e0       	ldi	r25, 0x01	; 1
- 100:	db df       	rcall	.-74     	; 0xb8 <wait>
- 102:	f7 cf       	rjmp	.-18     	; 0xf2 <main+0x10>
+ 106:	d0 e0       	ldi	r29, 0x00	; 0
+ 108:	ce 01       	movw	r24, r28
+ 10a:	e5 df       	rcall	.-54     	; 0xd6 <display>
 		}
-		else if(PINC & 0x02){
- 104:	99 9b       	sbis	0x13, 1	; 19
+		
+		if(PINC & 0x02){
+ 10c:	99 9b       	sbis	0x13, 1	; 19
+ 10e:	f1 cf       	rjmp	.-30     	; 0xf2 <main+0x10>
 			number--;
- 106:	f5 cf       	rjmp	.-22     	; 0xf2 <main+0x10>
+ 110:	21 97       	sbiw	r28, 0x01	; 1
+			if(number < 0){
+ 112:	12 f4       	brpl	.+4      	; 0x118 <main+0x36>
+				number = 0;
+ 114:	c0 e0       	ldi	r28, 0x00	; 0
+			}
 			display(number);
- 108:	21 97       	sbiw	r28, 0x01	; 1
- 10a:	ce 01       	movw	r24, r28
-			wait(500);
- 10c:	e4 df       	rcall	.-56     	; 0xd6 <display>
- 10e:	84 ef       	ldi	r24, 0xF4	; 244
- 110:	91 e0       	ldi	r25, 0x01	; 1
- 112:	d2 df       	rcall	.-92     	; 0xb8 <wait>
- 114:	ee cf       	rjmp	.-36     	; 0xf2 <main+0x10>
+ 116:	d0 e0       	ldi	r29, 0x00	; 0
+ 118:	ce 01       	movw	r24, r28
+ 11a:	dd df       	rcall	.-70     	; 0xd6 <display>
+ 11c:	ea cf       	rjmp	.-44     	; 0xf2 <main+0x10>
 
-00000116 <_exit>:
- 116:	f8 94       	cli
+0000011e <_exit>:
+ 11e:	f8 94       	cli
 
-00000118 <__stop_program>:
- 118:	ff cf       	rjmp	.-2      	; 0x118 <__stop_program>
+00000120 <__stop_program>:
+ 120:	ff cf       	rjmp	.-2      	; 0x120 <__stop_program>

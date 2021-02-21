@@ -21,11 +21,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   8 .debug_frame  00000034  00000000  00000000  00001668  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000465  00000000  00000000  0000169c  2**0
+  9 .debug_str    0000042e  00000000  00000000  0000169c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000008e  00000000  00000000  00001b01  2**0
+ 10 .debug_loc    0000008e  00000000  00000000  00001aca  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000018  00000000  00000000  00001b8f  2**0
+ 11 .debug_ranges 00000018  00000000  00000000  00001b58  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -160,11 +160,11 @@ Version :    	DMK, Initial code
 	
 	while (1)
 	{
-		for(int i = 0; i < 8; i++){
+		for(int i = 0; i < 8; i++){ // A for loop to go through all the possible LEDs in PORTD. 
   c0:	c0 e0       	ldi	r28, 0x00	; 0
   c2:	d0 e0       	ldi	r29, 0x00	; 0
   c4:	0d c0       	rjmp	.+26     	; 0xe0 <main+0x24>
-			PORTD = 0x01 << i;
+			PORTD = 0x01 << i;		// bit shift a specific amount to go to a specific LED
   c6:	81 e0       	ldi	r24, 0x01	; 1
   c8:	90 e0       	ldi	r25, 0x00	; 0
   ca:	0c 2e       	mov	r0, r28
@@ -174,7 +174,7 @@ Version :    	DMK, Initial code
   d2:	0a 94       	dec	r0
   d4:	e2 f7       	brpl	.-8      	; 0xce <main+0x12>
   d6:	82 bb       	out	0x12, r24	; 18
-			wait(50);
+			wait(50);				// Wait half a second
   d8:	82 e3       	ldi	r24, 0x32	; 50
   da:	90 e0       	ldi	r25, 0x00	; 0
   dc:	e0 df       	rcall	.-64     	; 0x9e <wait>
@@ -183,7 +183,7 @@ Version :    	DMK, Initial code
 	
 	while (1)
 	{
-		for(int i = 0; i < 8; i++){
+		for(int i = 0; i < 8; i++){ // A for loop to go through all the possible LEDs in PORTD. 
   de:	21 96       	adiw	r28, 0x01	; 1
   e0:	c8 30       	cpi	r28, 0x08	; 8
   e2:	d1 05       	cpc	r29, r1
@@ -191,10 +191,11 @@ Version :    	DMK, Initial code
   e6:	c7 e0       	ldi	r28, 0x07	; 7
   e8:	d0 e0       	ldi	r29, 0x00	; 0
   ea:	0d c0       	rjmp	.+26     	; 0x106 <main+0x4a>
-			PORTD = 0x01 << i;
-			wait(50);
+			PORTD = 0x01 << i;		// bit shift a specific amount to go to a specific LED
+			wait(50);				// Wait half a second
 		}
-		for(int i = 7; i > 0; i--){
+		
+		for(int i = 7; i > 0; i--){	// this section does the same the for loop above. But this one does the reverse order. So the LED goes back and forth.
 			PORTD = 0x01 << i;
   ec:	81 e0       	ldi	r24, 0x01	; 1
   ee:	90 e0       	ldi	r25, 0x00	; 0
@@ -209,12 +210,12 @@ Version :    	DMK, Initial code
   fe:	82 e3       	ldi	r24, 0x32	; 50
  100:	90 e0       	ldi	r25, 0x00	; 0
  102:	cd df       	rcall	.-102    	; 0x9e <wait>
-	{
-		for(int i = 0; i < 8; i++){
-			PORTD = 0x01 << i;
-			wait(50);
+		for(int i = 0; i < 8; i++){ // A for loop to go through all the possible LEDs in PORTD. 
+			PORTD = 0x01 << i;		// bit shift a specific amount to go to a specific LED
+			wait(50);				// Wait half a second
 		}
-		for(int i = 7; i > 0; i--){
+		
+		for(int i = 7; i > 0; i--){	// this section does the same the for loop above. But this one does the reverse order. So the LED goes back and forth.
  104:	21 97       	sbiw	r28, 0x01	; 1
  106:	1c 16       	cp	r1, r28
  108:	1d 06       	cpc	r1, r29
