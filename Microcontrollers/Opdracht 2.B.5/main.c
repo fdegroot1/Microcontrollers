@@ -75,11 +75,14 @@ int main( void ) {
 	_delay_ms(10);
 	
 	lcd_clear();
+	
+	set_cursor(1);
 
 	// Write sample string
 	lcd_write_string("Hello world!");
 	
-	set_cursor(1);
+	
+	//set_cursor(1);
 
 	// Loop forever
 	while (1) {

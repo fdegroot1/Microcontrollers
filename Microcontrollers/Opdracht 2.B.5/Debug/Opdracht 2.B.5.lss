@@ -438,18 +438,20 @@ int main( void ) {
 	lcd_clear();
  1d6:	00 00       	nop
  1d8:	c8 df       	rcall	.-112    	; 0x16a <lcd_clear>
+	
+	set_cursor(1);
+ 1da:	81 e0       	ldi	r24, 0x01	; 1
+ 1dc:	90 e0       	ldi	r25, 0x00	; 0
+ 1de:	d0 df       	rcall	.-96     	; 0x180 <set_cursor>
 
 	// Write sample string
 	lcd_write_string("Hello world!");
- 1da:	80 e0       	ldi	r24, 0x00	; 0
- 1dc:	91 e0       	ldi	r25, 0x01	; 1
- 1de:	a9 df       	rcall	.-174    	; 0x132 <lcd_write_string>
-	
-	set_cursor(1);
- 1e0:	81 e0       	ldi	r24, 0x01	; 1
- 1e2:	90 e0       	ldi	r25, 0x00	; 0
- 1e4:	cd df       	rcall	.-102    	; 0x180 <set_cursor>
+ 1e0:	80 e0       	ldi	r24, 0x00	; 0
+ 1e2:	91 e0       	ldi	r25, 0x01	; 1
+ 1e4:	a6 df       	rcall	.-180    	; 0x132 <lcd_write_string>
  1e6:	95 b3       	in	r25, 0x15	; 21
+	
+	//set_cursor(1);
 
 	// Loop forever
 	while (1) {
