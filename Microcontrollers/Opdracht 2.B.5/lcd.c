@@ -39,7 +39,7 @@ Version :    	DMK, Initial code
 *******************************************************************/
 void init_4bits_mode(void) {
 	// PORTC output mode and all low (also E and RS pin)
-	DDRD = 0xFF;
+	DDRC = 0xFF;
 	DDRA = 0xFF;
 	PORTC = 0x00;
 	PORTA = 0x00;
