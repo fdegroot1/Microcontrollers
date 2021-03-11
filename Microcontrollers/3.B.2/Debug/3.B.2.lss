@@ -433,8 +433,8 @@ void timer2Init( void ) {
  1dc:	11 24       	eor	r1, r1
  1de:	8f 93       	push	r24
  1e0:	9f 93       	push	r25
- 1e2:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 1e6:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 1e2:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <TimerPreset>
+ 1e6:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <TimerPreset+0x1>
  1ea:	84 bd       	out	0x24, r24	; 36
  1ec:	80 91 0e 01 	lds	r24, 0x010E	; 0x80010e <tenthValue>
  1f0:	90 91 0f 01 	lds	r25, 0x010F	; 0x80010f <tenthValue+0x1>
