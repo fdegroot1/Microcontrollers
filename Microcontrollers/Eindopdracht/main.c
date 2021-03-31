@@ -1,22 +1,4 @@
-/*
- * ultrasonicSensor.c
- *
- * Created: 17-3-2021 09:47:12
- * Author : Sem
- 
- interrupt op rising edge in echo,
-	dan timer1 aanzetten -> timer1 want 16 bits en willen nauwkeurig afstand kunnen meten, en afstand kan van 2 cm tot 4 m, dus willen zeker zijn dat het past
-	en interrupt zetten op falling edge in echo
-	als falling edge interrupt geeft ->
-		waarde uit timer1 uitlezen
-		en formule gebruiken high level time * velocity (340M/S) / 2
-		timer1 uitzetten
-		interrupt weer op rising edge van echo zetten
-		
-
- 
- */ 
-#define F_CPU 20e6
+#define F_CPU 8e6
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -24,35 +6,20 @@
 
 #include "lcd.h"
 
+#define BIT(x) ( 1<<x )
+#define DDR_SPI DDRB // spi Data direction register
+#define PORT_SPI PORTB // spi Output register
+#define SPI_SCK 1 // PB1: spi Pin System Clock
+#define SPI_MOSI 2 // PB2: spi Pin MOSI
+#define SPI_MISO 3 // PB3: spi Pin MISO
+#define SPI_SS 0 // PB0: spi Pin Slave Select
+
 enum interrupt_status {INTERRUPT_FALLING, INTERRUPT_RISING};
 	
 static enum interrupt_status int_stat = INTERRUPT_RISING;
 
 uint16_t timer_dist = 125; // time measured by timer;
 
-void wait_us(unsigned int us)
-{
-	for(int i = 0; i < us; i++)
-	{
-		_delay_us(1);
-	}
-}
-
-void wait_ms(unsigned int ms)
-{
-	
-	for(int i = 0; i < ms; i++)
-	{
-		_delay_ms(1);
-	}
-}
-
-void ultrasonic_send_pulse()
-{
-	PORTG = 0x00; // 10 us low pulse
-	wait_us(10);
-	PORTG = 0x01;
-}
 
 ISR(INT0_vect)
 {
@@ -84,6 +51,84 @@ ISR(INT0_vect)
 }
 
 
+void spi_masterInit(void)
+{
+	DDR_SPI = 0xff; // All pins output: MOSI, SCK, SS, SS_display
+	DDR_SPI &= ~BIT(SPI_MISO); // except: MISO input
+	PORT_SPI |= BIT(SPI_SS); // SS_ADC == 1: deselect slave
+	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1); // or: SPCR = 0b11010010;
+	// Enable spi, MasterMode, Clock rate fck/64
+	// bitrate=125kHz, Mode = 0: CPOL=0, CPPH=0
+}
+// Write a byte from master to slave
+void spi_write( unsigned char data )
+{
+	SPDR = data; // Load byte --> starts transmission
+	while( !(SPSR & BIT(SPIF)) ); // Wait for transmission complete
+}
+// Write a byte from master to slave and read a byte from slave - not used here
+char spi_writeRead( unsigned char data )
+{
+	SPDR = data; // Load byte --> starts transmission
+	while( !(SPSR & BIT(SPIF)) ); // Wait for transmission complete
+	data = SPDR; // New received data (eventually, MISO) in SPDR
+	return data; // Return received byte
+}
+// Select device on pinnumer PORTB
+void spi_slaveSelect(unsigned char chipNumber)
+{
+	PORTB &= ~BIT(chipNumber);
+}
+// Deselect device on pinnumer PORTB
+void spi_slaveDeSelect(unsigned char chipNumber)
+{
+	PORTB |= BIT(chipNumber);
+}
+
+
+void wait_us(unsigned int us)
+{
+	for(int i = 0; i < us; i++)
+	{
+		_delay_us(1);
+	}
+}
+
+void wait_ms(unsigned int ms)
+{
+	
+	for(int i = 0; i < ms; i++)
+	{
+		_delay_ms(1);
+	}
+}
+
+void ultrasonic_send_pulse()
+{
+	PORTG = 0x00; // 10 us low pulse
+	wait_us(10);
+	PORTG = 0x01;
+}
+
+
+
+void ultrasonic_measurement(){
+	char snum[5];
+	
+	ultrasonic_send_pulse();
+	int distance = timer_dist * (340 / 2);
+	lcd_clear();
+	itoa(distance, snum, 10);;
+	lcd_write_string(snum);
+	
+	wait_ms(200);
+}
+
+
+
+
+
+
 int main(void)
 {
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
@@ -96,28 +141,20 @@ int main(void)
 	TCCR1A = 0b00000000; // initialize timer1, prescaler=256
 	TCCR1B = 0b00001100; // CTC compare A, RUN
 	
-	
 	sei(); // turn on interrupt system
 	
+	
+	spi_masterInit();
+	_delay_ms(50);
+	
 	init_4bits_mode();
-	
 	_delay_ms(10);
-	
 	lcd_clear();
-	char snum[5];
+
 
     while (1) 
     {
-		ultrasonic_send_pulse();
 		
-		int distance = timer_dist * (340 / 2);
-		lcd_clear();
-	
-		itoa(distance, snum, 10);;
-		
-		lcd_write_string(snum);
-		
-		wait_ms(200);
     }
 }
 

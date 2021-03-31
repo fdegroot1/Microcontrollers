@@ -3,29 +3,29 @@ Eindopdracht.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000004  00800100  0000030a  0000037e  2**0
+  0 .data         00000004  00800100  00000324  00000398  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000030a  00000000  00000000  00000074  2**1
+  1 .text         00000324  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000382  2**0
+  2 .comment      00000030  00000000  00000000  0000039c  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003b4  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000003cc  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000090  00000000  00000000  000003f0  2**0
+  4 .debug_aranges 00000098  00000000  00000000  00000408  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000e75  00000000  00000000  00000480  2**0
+  5 .debug_info   00000e87  00000000  00000000  000004a0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000a7e  00000000  00000000  000012f5  2**0
+  6 .debug_abbrev 00000a82  00000000  00000000  00001327  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000689  00000000  00000000  00001d73  2**0
+  7 .debug_line   00000692  00000000  00000000  00001da9  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000150  00000000  00000000  000023fc  2**2
+  8 .debug_frame  0000016c  00000000  00000000  0000243c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000555  00000000  00000000  0000254c  2**0
+  9 .debug_str    000005a3  00000000  00000000  000025a8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000464  00000000  00000000  00002aa1  2**0
+ 10 .debug_loc    00000496  00000000  00000000  00002b4b  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000070  00000000  00000000  00002f05  2**0
+ 11 .debug_ranges 00000078  00000000  00000000  00002fe1  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -114,7 +114,7 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	ea e0       	ldi	r30, 0x0A	; 10
+  9e:	e4 e2       	ldi	r30, 0x24	; 36
   a0:	f3 e0       	ldi	r31, 0x03	; 3
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
@@ -124,8 +124,8 @@ Disassembly of section .text:
   ac:	a4 30       	cpi	r26, 0x04	; 4
   ae:	b1 07       	cpc	r27, r17
   b0:	d9 f7       	brne	.-10     	; 0xa8 <__do_copy_data+0x10>
-  b2:	b5 d0       	rcall	.+362    	; 0x21e <main>
-  b4:	28 c1       	rjmp	.+592    	; 0x306 <_exit>
+  b2:	e1 d0       	rcall	.+450    	; 0x276 <main>
+  b4:	35 c1       	rjmp	.+618    	; 0x320 <_exit>
 
 000000b6 <__bad_interrupt>:
   b6:	a4 cf       	rjmp	.-184    	; 0x0 <__vectors>
@@ -498,168 +498,184 @@ ISR(INT0_vect)
  21a:	1f 90       	pop	r1
  21c:	18 95       	reti
 
-0000021e <main>:
+0000021e <ultrasonic_measurement>:
 
+void ultrasonic_measurement(){
+ 21e:	0f 93       	push	r16
+ 220:	1f 93       	push	r17
+ 222:	cf 93       	push	r28
+ 224:	df 93       	push	r29
+ 226:	00 d0       	rcall	.+0      	; 0x228 <ultrasonic_measurement+0xa>
+ 228:	00 d0       	rcall	.+0      	; 0x22a <ultrasonic_measurement+0xc>
+ 22a:	1f 92       	push	r1
+ 22c:	cd b7       	in	r28, 0x3d	; 61
+ 22e:	de b7       	in	r29, 0x3e	; 62
+	char snum[5];
+	
+	ultrasonic_send_pulse();
+ 230:	c3 df       	rcall	.-122    	; 0x1b8 <ultrasonic_send_pulse>
+	int distance = timer_dist * (340 / 2);
+ 232:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 236:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
+ 23a:	2a ea       	ldi	r18, 0xAA	; 170
+ 23c:	28 9f       	mul	r18, r24
+ 23e:	80 01       	movw	r16, r0
+ 240:	29 9f       	mul	r18, r25
+ 242:	10 0d       	add	r17, r0
+	lcd_clear();
+ 244:	11 24       	eor	r1, r1
+ 246:	91 df       	rcall	.-222    	; 0x16a <lcd_clear>
+	itoa(distance, snum, 10);;
+ 248:	4a e0       	ldi	r20, 0x0A	; 10
+ 24a:	50 e0       	ldi	r21, 0x00	; 0
+ 24c:	be 01       	movw	r22, r28
+ 24e:	6f 5f       	subi	r22, 0xFF	; 255
+ 250:	7f 4f       	sbci	r23, 0xFF	; 255
+ 252:	c8 01       	movw	r24, r16
+ 254:	28 d0       	rcall	.+80     	; 0x2a6 <itoa>
+	lcd_write_string(snum);
+ 256:	ce 01       	movw	r24, r28
+ 258:	01 96       	adiw	r24, 0x01	; 1
+ 25a:	6b df       	rcall	.-298    	; 0x132 <lcd_write_string>
+	
+	wait_ms(200);
+ 25c:	88 ec       	ldi	r24, 0xC8	; 200
+ 25e:	90 e0       	ldi	r25, 0x00	; 0
+ 260:	9c df       	rcall	.-200    	; 0x19a <wait_ms>
+ 262:	0f 90       	pop	r0
+}
+ 264:	0f 90       	pop	r0
+ 266:	0f 90       	pop	r0
+ 268:	0f 90       	pop	r0
+ 26a:	0f 90       	pop	r0
+ 26c:	df 91       	pop	r29
+ 26e:	cf 91       	pop	r28
+ 270:	1f 91       	pop	r17
+ 272:	0f 91       	pop	r16
+ 274:	08 95       	ret
+
+00000276 <main>:
+ 276:	8f ef       	ldi	r24, 0xFF	; 255
 
 int main(void)
 {
- 21e:	cf 93       	push	r28
- 220:	df 93       	push	r29
- 222:	00 d0       	rcall	.+0      	; 0x224 <main+0x6>
- 224:	00 d0       	rcall	.+0      	; 0x226 <main+0x8>
- 226:	1f 92       	push	r1
- 228:	cd b7       	in	r28, 0x3d	; 61
- 22a:	de b7       	in	r29, 0x3e	; 62
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
- 22c:	8f ef       	ldi	r24, 0xFF	; 255
- 22e:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <__TEXT_REGION_LENGTH__+0x7e0064>
+ 278:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <__TEXT_REGION_LENGTH__+0x7e0064>
 	DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
- 232:	11 ba       	out	0x11, r1	; 17
+ 27c:	11 ba       	out	0x11, r1	; 17
 	
 	EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
- 234:	83 e0       	ldi	r24, 0x03	; 3
- 236:	80 93 6a 00 	sts	0x006A, r24	; 0x80006a <__TEXT_REGION_LENGTH__+0x7e006a>
+ 27e:	83 e0       	ldi	r24, 0x03	; 3
+ 280:	80 93 6a 00 	sts	0x006A, r24	; 0x80006a <__TEXT_REGION_LENGTH__+0x7e006a>
 	
 	EIMSK |= 0x01; // enable interrupt on pin 0 (INT0)
- 23a:	89 b7       	in	r24, 0x39	; 57
- 23c:	81 60       	ori	r24, 0x01	; 1
- 23e:	89 bf       	out	0x39, r24	; 57
+ 284:	89 b7       	in	r24, 0x39	; 57
+ 286:	81 60       	ori	r24, 0x01	; 1
+ 288:	89 bf       	out	0x39, r24	; 57
 	
 	TCCR1A = 0b00000000; // initialize timer1, prescaler=256
- 240:	1f bc       	out	0x2f, r1	; 47
+ 28a:	1f bc       	out	0x2f, r1	; 47
 	TCCR1B = 0b00001100; // CTC compare A, RUN
- 242:	8c e0       	ldi	r24, 0x0C	; 12
- 244:	8e bd       	out	0x2e, r24	; 46
-	
+ 28c:	8c e0       	ldi	r24, 0x0C	; 12
+ 28e:	8e bd       	out	0x2e, r24	; 46
 	
 	sei(); // turn on interrupt system
- 246:	78 94       	sei
+ 290:	78 94       	sei
 	
 	init_4bits_mode();
- 248:	4a df       	rcall	.-364    	; 0xde <init_4bits_mode>
- 24a:	8f e4       	ldi	r24, 0x4F	; 79
- 24c:	93 ec       	ldi	r25, 0xC3	; 195
- 24e:	01 97       	sbiw	r24, 0x01	; 1
- 250:	f1 f7       	brne	.-4      	; 0x24e <main+0x30>
- 252:	00 c0       	rjmp	.+0      	; 0x254 <main+0x36>
+ 292:	25 df       	rcall	.-438    	; 0xde <init_4bits_mode>
+ 294:	8f e4       	ldi	r24, 0x4F	; 79
+ 296:	93 ec       	ldi	r25, 0xC3	; 195
+ 298:	01 97       	sbiw	r24, 0x01	; 1
+ 29a:	f1 f7       	brne	.-4      	; 0x298 <main+0x22>
+ 29c:	00 c0       	rjmp	.+0      	; 0x29e <main+0x28>
 	
 	_delay_ms(10);
 	
 	lcd_clear();
- 254:	00 00       	nop
-	char snum[5];
+ 29e:	00 00       	nop
+
 
     while (1) 
     {
-		ultrasonic_send_pulse();
- 256:	89 df       	rcall	.-238    	; 0x16a <lcd_clear>
- 258:	af df       	rcall	.-162    	; 0x1b8 <ultrasonic_send_pulse>
-		
-		int distance = timer_dist * (340 / 2);
- 25a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 25e:	90 91 01 01 	lds	r25, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
- 262:	2a ea       	ldi	r18, 0xAA	; 170
- 264:	28 9f       	mul	r18, r24
- 266:	80 01       	movw	r16, r0
- 268:	29 9f       	mul	r18, r25
- 26a:	10 0d       	add	r17, r0
-		lcd_clear();
- 26c:	11 24       	eor	r1, r1
- 26e:	7d df       	rcall	.-262    	; 0x16a <lcd_clear>
-	
-		itoa(distance, snum, 10);;
- 270:	4a e0       	ldi	r20, 0x0A	; 10
- 272:	50 e0       	ldi	r21, 0x00	; 0
- 274:	be 01       	movw	r22, r28
- 276:	6f 5f       	subi	r22, 0xFF	; 255
- 278:	7f 4f       	sbci	r23, 0xFF	; 255
- 27a:	c8 01       	movw	r24, r16
-		
-		lcd_write_string(snum);
- 27c:	07 d0       	rcall	.+14     	; 0x28c <itoa>
- 27e:	ce 01       	movw	r24, r28
- 280:	01 96       	adiw	r24, 0x01	; 1
-		
-		wait_ms(200);
- 282:	57 df       	rcall	.-338    	; 0x132 <lcd_write_string>
- 284:	88 ec       	ldi	r24, 0xC8	; 200
- 286:	90 e0       	ldi	r25, 0x00	; 0
- 288:	88 df       	rcall	.-240    	; 0x19a <wait_ms>
- 28a:	e6 cf       	rjmp	.-52     	; 0x258 <main+0x3a>
+		ultrasonic_measurement();
+ 2a0:	64 df       	rcall	.-312    	; 0x16a <lcd_clear>
+ 2a2:	bd df       	rcall	.-134    	; 0x21e <ultrasonic_measurement>
+ 2a4:	fe cf       	rjmp	.-4      	; 0x2a2 <main+0x2c>
 
-0000028c <itoa>:
- 28c:	45 32       	cpi	r20, 0x25	; 37
- 28e:	51 05       	cpc	r21, r1
- 290:	18 f4       	brcc	.+6      	; 0x298 <itoa+0xc>
- 292:	42 30       	cpi	r20, 0x02	; 2
- 294:	08 f0       	brcs	.+2      	; 0x298 <itoa+0xc>
- 296:	04 c0       	rjmp	.+8      	; 0x2a0 <__itoa_ncheck>
- 298:	fb 01       	movw	r30, r22
- 29a:	10 82       	st	Z, r1
- 29c:	cb 01       	movw	r24, r22
- 29e:	08 95       	ret
+000002a6 <itoa>:
+ 2a6:	45 32       	cpi	r20, 0x25	; 37
+ 2a8:	51 05       	cpc	r21, r1
+ 2aa:	18 f4       	brcc	.+6      	; 0x2b2 <itoa+0xc>
+ 2ac:	42 30       	cpi	r20, 0x02	; 2
+ 2ae:	08 f0       	brcs	.+2      	; 0x2b2 <itoa+0xc>
+ 2b0:	04 c0       	rjmp	.+8      	; 0x2ba <__itoa_ncheck>
+ 2b2:	fb 01       	movw	r30, r22
+ 2b4:	10 82       	st	Z, r1
+ 2b6:	cb 01       	movw	r24, r22
+ 2b8:	08 95       	ret
 
-000002a0 <__itoa_ncheck>:
- 2a0:	bb 27       	eor	r27, r27
- 2a2:	4a 30       	cpi	r20, 0x0A	; 10
- 2a4:	31 f4       	brne	.+12     	; 0x2b2 <__itoa_ncheck+0x12>
- 2a6:	99 23       	and	r25, r25
- 2a8:	22 f4       	brpl	.+8      	; 0x2b2 <__itoa_ncheck+0x12>
- 2aa:	bd e2       	ldi	r27, 0x2D	; 45
- 2ac:	90 95       	com	r25
- 2ae:	81 95       	neg	r24
- 2b0:	9f 4f       	sbci	r25, 0xFF	; 255
- 2b2:	01 c0       	rjmp	.+2      	; 0x2b6 <__utoa_common>
+000002ba <__itoa_ncheck>:
+ 2ba:	bb 27       	eor	r27, r27
+ 2bc:	4a 30       	cpi	r20, 0x0A	; 10
+ 2be:	31 f4       	brne	.+12     	; 0x2cc <__itoa_ncheck+0x12>
+ 2c0:	99 23       	and	r25, r25
+ 2c2:	22 f4       	brpl	.+8      	; 0x2cc <__itoa_ncheck+0x12>
+ 2c4:	bd e2       	ldi	r27, 0x2D	; 45
+ 2c6:	90 95       	com	r25
+ 2c8:	81 95       	neg	r24
+ 2ca:	9f 4f       	sbci	r25, 0xFF	; 255
+ 2cc:	01 c0       	rjmp	.+2      	; 0x2d0 <__utoa_common>
 
-000002b4 <__utoa_ncheck>:
- 2b4:	bb 27       	eor	r27, r27
+000002ce <__utoa_ncheck>:
+ 2ce:	bb 27       	eor	r27, r27
 
-000002b6 <__utoa_common>:
- 2b6:	fb 01       	movw	r30, r22
- 2b8:	55 27       	eor	r21, r21
- 2ba:	aa 27       	eor	r26, r26
- 2bc:	88 0f       	add	r24, r24
- 2be:	99 1f       	adc	r25, r25
- 2c0:	aa 1f       	adc	r26, r26
- 2c2:	a4 17       	cp	r26, r20
- 2c4:	10 f0       	brcs	.+4      	; 0x2ca <__utoa_common+0x14>
- 2c6:	a4 1b       	sub	r26, r20
- 2c8:	83 95       	inc	r24
- 2ca:	50 51       	subi	r21, 0x10	; 16
- 2cc:	b9 f7       	brne	.-18     	; 0x2bc <__utoa_common+0x6>
- 2ce:	a0 5d       	subi	r26, 0xD0	; 208
- 2d0:	aa 33       	cpi	r26, 0x3A	; 58
- 2d2:	08 f0       	brcs	.+2      	; 0x2d6 <__utoa_common+0x20>
- 2d4:	a9 5d       	subi	r26, 0xD9	; 217
- 2d6:	a1 93       	st	Z+, r26
- 2d8:	00 97       	sbiw	r24, 0x00	; 0
- 2da:	79 f7       	brne	.-34     	; 0x2ba <__utoa_common+0x4>
- 2dc:	b1 11       	cpse	r27, r1
- 2de:	b1 93       	st	Z+, r27
- 2e0:	11 92       	st	Z+, r1
- 2e2:	cb 01       	movw	r24, r22
- 2e4:	00 c0       	rjmp	.+0      	; 0x2e6 <strrev>
+000002d0 <__utoa_common>:
+ 2d0:	fb 01       	movw	r30, r22
+ 2d2:	55 27       	eor	r21, r21
+ 2d4:	aa 27       	eor	r26, r26
+ 2d6:	88 0f       	add	r24, r24
+ 2d8:	99 1f       	adc	r25, r25
+ 2da:	aa 1f       	adc	r26, r26
+ 2dc:	a4 17       	cp	r26, r20
+ 2de:	10 f0       	brcs	.+4      	; 0x2e4 <__utoa_common+0x14>
+ 2e0:	a4 1b       	sub	r26, r20
+ 2e2:	83 95       	inc	r24
+ 2e4:	50 51       	subi	r21, 0x10	; 16
+ 2e6:	b9 f7       	brne	.-18     	; 0x2d6 <__utoa_common+0x6>
+ 2e8:	a0 5d       	subi	r26, 0xD0	; 208
+ 2ea:	aa 33       	cpi	r26, 0x3A	; 58
+ 2ec:	08 f0       	brcs	.+2      	; 0x2f0 <__utoa_common+0x20>
+ 2ee:	a9 5d       	subi	r26, 0xD9	; 217
+ 2f0:	a1 93       	st	Z+, r26
+ 2f2:	00 97       	sbiw	r24, 0x00	; 0
+ 2f4:	79 f7       	brne	.-34     	; 0x2d4 <__utoa_common+0x4>
+ 2f6:	b1 11       	cpse	r27, r1
+ 2f8:	b1 93       	st	Z+, r27
+ 2fa:	11 92       	st	Z+, r1
+ 2fc:	cb 01       	movw	r24, r22
+ 2fe:	00 c0       	rjmp	.+0      	; 0x300 <strrev>
 
-000002e6 <strrev>:
- 2e6:	dc 01       	movw	r26, r24
- 2e8:	fc 01       	movw	r30, r24
- 2ea:	67 2f       	mov	r22, r23
- 2ec:	71 91       	ld	r23, Z+
- 2ee:	77 23       	and	r23, r23
- 2f0:	e1 f7       	brne	.-8      	; 0x2ea <strrev+0x4>
- 2f2:	32 97       	sbiw	r30, 0x02	; 2
- 2f4:	04 c0       	rjmp	.+8      	; 0x2fe <strrev+0x18>
- 2f6:	7c 91       	ld	r23, X
- 2f8:	6d 93       	st	X+, r22
- 2fa:	70 83       	st	Z, r23
- 2fc:	62 91       	ld	r22, -Z
- 2fe:	ae 17       	cp	r26, r30
- 300:	bf 07       	cpc	r27, r31
- 302:	c8 f3       	brcs	.-14     	; 0x2f6 <strrev+0x10>
- 304:	08 95       	ret
+00000300 <strrev>:
+ 300:	dc 01       	movw	r26, r24
+ 302:	fc 01       	movw	r30, r24
+ 304:	67 2f       	mov	r22, r23
+ 306:	71 91       	ld	r23, Z+
+ 308:	77 23       	and	r23, r23
+ 30a:	e1 f7       	brne	.-8      	; 0x304 <strrev+0x4>
+ 30c:	32 97       	sbiw	r30, 0x02	; 2
+ 30e:	04 c0       	rjmp	.+8      	; 0x318 <strrev+0x18>
+ 310:	7c 91       	ld	r23, X
+ 312:	6d 93       	st	X+, r22
+ 314:	70 83       	st	Z, r23
+ 316:	62 91       	ld	r22, -Z
+ 318:	ae 17       	cp	r26, r30
+ 31a:	bf 07       	cpc	r27, r31
+ 31c:	c8 f3       	brcs	.-14     	; 0x310 <strrev+0x10>
+ 31e:	08 95       	ret
 
-00000306 <_exit>:
- 306:	f8 94       	cli
+00000320 <_exit>:
+ 320:	f8 94       	cli
 
-00000308 <__stop_program>:
- 308:	ff cf       	rjmp	.-2      	; 0x308 <__stop_program>
+00000322 <__stop_program>:
+ 322:	ff cf       	rjmp	.-2      	; 0x322 <__stop_program>
