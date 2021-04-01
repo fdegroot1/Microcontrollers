@@ -1,21 +1,23 @@
 #define F_CPU 8e6
 
 #include <avr/io.h>
+#include <stdio.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
 #include "lcd.h"
 
 #define BIT(x) ( 1<<x )
-#define DDR_SPI DDRB // spi Data direction register
-#define PORT_SPI PORTB // spi Output register
-#define SPI_SCK 1 // PB1: spi Pin System Clock
-#define SPI_MOSI 2 // PB2: spi Pin MOSI
-#define SPI_MISO 3 // PB3: spi Pin MISO
-#define SPI_SS 0 // PB0: spi Pin Slave Select
+#define STEPPER_PIN1 4
+#define STEPPER_PIN2 5
+#define STEPPER_PIN3 6
+#define STEPPER_PIN4 7
 
+int step_number = 0;
+enum direction_stepper_moter {CLOCKWISE, COUNTER_CLOCKWISE};
 enum interrupt_status {INTERRUPT_FALLING, INTERRUPT_RISING};
 	
+static enum direction_stepper_moter dir_stepper_motor = CLOCKWISE;	
 static enum interrupt_status int_stat = INTERRUPT_RISING;
 
 uint16_t timer_dist = 125; // time measured by timer;
@@ -48,41 +50,6 @@ ISR(INT0_vect)
 		int_stat = INTERRUPT_RISING;
 	}
 	
-}
-
-
-void spi_masterInit(void)
-{
-	DDR_SPI = 0xff; // All pins output: MOSI, SCK, SS, SS_display
-	DDR_SPI &= ~BIT(SPI_MISO); // except: MISO input
-	PORT_SPI |= BIT(SPI_SS); // SS_ADC == 1: deselect slave
-	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1); // or: SPCR = 0b11010010;
-	// Enable spi, MasterMode, Clock rate fck/64
-	// bitrate=125kHz, Mode = 0: CPOL=0, CPPH=0
-}
-// Write a byte from master to slave
-void spi_write( unsigned char data )
-{
-	SPDR = data; // Load byte --> starts transmission
-	while( !(SPSR & BIT(SPIF)) ); // Wait for transmission complete
-}
-// Write a byte from master to slave and read a byte from slave - not used here
-char spi_writeRead( unsigned char data )
-{
-	SPDR = data; // Load byte --> starts transmission
-	while( !(SPSR & BIT(SPIF)) ); // Wait for transmission complete
-	data = SPDR; // New received data (eventually, MISO) in SPDR
-	return data; // Return received byte
-}
-// Select device on pinnumer PORTB
-void spi_slaveSelect(unsigned char chipNumber)
-{
-	PORTB &= ~BIT(chipNumber);
-}
-// Deselect device on pinnumer PORTB
-void spi_slaveDeSelect(unsigned char chipNumber)
-{
-	PORTB |= BIT(chipNumber);
 }
 
 
@@ -124,38 +91,109 @@ void ultrasonic_measurement(){
 	wait_ms(200);
 }
 
+void write_int_lcd(int number){
+	int length = snprintf(NULL, 0, "%d", number);
+	char str[length + 1];
+	snprintf(str, length + 1, "%d", number);
+	lcd_write_string(str);
+}
 
-
-
+void OneStep();
 
 
 int main(void)
 {
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
-	DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
+	DDRE = 0xFF;
+	//DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
+	//
+	//EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
+	//
+	//EIMSK |= 0x01; // enable interrupt on pin 0 (INT0)
+	//
+	//TCCR1A = 0b00000000; // initialize timer1, prescaler=256
+	//TCCR1B = 0b00001100; // CTC compare A, RUN
+	//
+	//sei(); // turn on interrupt system
 	
-	EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
-	
-	EIMSK |= 0x01; // enable interrupt on pin 0 (INT0)
-	
-	TCCR1A = 0b00000000; // initialize timer1, prescaler=256
-	TCCR1B = 0b00001100; // CTC compare A, RUN
-	
-	sei(); // turn on interrupt system
-	
-	
-	spi_masterInit();
 	_delay_ms(50);
 	
 	init_4bits_mode();
 	_delay_ms(10);
 	lcd_clear();
 
+	//stepper motor degree value
+	// 360 degree = 4096
+	// 180 degree = 2048
+	// 90 degree  = 1024
+	// 45 degree  = 512
+	write_int_lcd(360);
+	for(int i = 0; i < 4096; i++){
+		OneStep();
+		_delay_ms(1);
+	}
+
 
     while (1) 
     {
-		
+		//OneStep();
+		_delay_ms(100);
     }
+}
+
+
+void OneStep(){
+	switch(step_number){
+		case 0:
+		PORTE = 0b00000001;
+		break;
+		
+		case 1:
+		PORTE = 0b00000011;
+		break;
+		
+		case 2:
+		PORTE = 0b00000010;
+		break;
+		
+		case 3:
+		PORTE = 0b00000110;
+		break;
+		
+		case 4:
+		PORTE = 0b00000100;
+		break;
+		
+		case 5:
+		PORTE = 0b00001100;
+		break;
+		
+		case 6:
+		PORTE = 0b00001000;
+		break;
+		
+		case 7:
+		PORTE = 0b00001001;
+		break;
+		
+		default:
+		PORTE = 0b00000000;
+		break;
+	}
+		 
+	if(dir_stepper_motor == CLOCKWISE){
+		step_number++;
+	} else{
+		step_number--;
+	}
+
+	if(step_number > 7){
+		step_number = 0;
+	}
+	if(step_number < 0){
+		step_number = 7;
+	}
+	_delay_ms(1);
 }
 
 
