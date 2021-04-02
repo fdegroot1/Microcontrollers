@@ -8,10 +8,6 @@
 #include "lcd.h"
 
 #define BIT(x) ( 1<<x )
-#define STEPPER_PIN1 4
-#define STEPPER_PIN2 5
-#define STEPPER_PIN3 6
-#define STEPPER_PIN4 7
 #define LEFT 2 //pin 2
 #define RIGHT 1 // pin 1
 #define SONAR 0 //pin 0
@@ -24,6 +20,61 @@ static enum direction_stepper_moter dir_stepper_motor = CLOCKWISE;
 static enum interrupt_status int_stat = INTERRUPT_RISING;
 
 uint16_t timer_dist = 125; // time measured by timer;
+
+void OneStep(){
+	switch(step_number){
+		case 0:
+		PORTE = 0b00000001;
+		break;
+		
+		case 1:
+		PORTE = 0b00000011;
+		break;
+		
+		case 2:
+		PORTE = 0b00000010;
+		break;
+		
+		case 3:
+		PORTE = 0b00000110;
+		break;
+		
+		case 4:
+		PORTE = 0b00000100;
+		break;
+		
+		case 5:
+		PORTE = 0b00001100;
+		break;
+		
+		case 6:
+		PORTE = 0b00001000;
+		break;
+		
+		case 7:
+		PORTE = 0b00001001;
+		break;
+		
+		default:
+		PORTE = 0b00000000;
+		break;
+	}
+	
+	if(dir_stepper_motor == CLOCKWISE){
+		step_number++;
+		} else{
+		step_number--;
+	}
+
+	if(step_number > 7){
+		step_number = 0;
+	}
+	if(step_number < 0){
+		step_number = 7;
+	}
+	_delay_ms(1);
+}
+
 
 
 ISR(INT0_vect)
@@ -101,9 +152,6 @@ void write_int_lcd(int number){
 	lcd_write_string(str);
 }
 
-void OneStep();
-
-
 int main(void)
 {
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
@@ -118,20 +166,10 @@ int main(void)
 	
 	sei(); // turn on interrupt system
 	
-	
-	spi_masterInit();
-	_delay_ms(50);
-	
 	init_4bits_mode();
 	_delay_ms(10);
 	lcd_clear();
 
-	//stepper motor degree value
-	// 360 degree = 4096
-	// 180 degree = 2048
-	// 90 degree  = 1024
-	// 45 degree  = 512
-	write_int_lcd(360);
 	for(int i = 0; i < 4096; i++){
 		OneStep();
 		_delay_ms(1);
@@ -147,82 +185,32 @@ int main(void)
 			}
 			else{
 				//TODO activate sonar
-				isSonarActive = 1
+				isSonarActive = 1;
 			}
 		}
 		
 		if(PINF & BIT(LEFT)){
 			//TODO rotate to left
+			OneStep();
+			_delay_ms(1);
 		}
 		
 		if(PINF & BIT(RIGHT)){
 			//TODO rotate to right
+			OneStep();
+			_delay_ms(1);
 		}
 		
 		if(isSonarActive){
 			ultrasonic_measurement();
 		}
 		else{
+			lcd_clear();
 			lcd_write_string("Sonar is off");
 		}
+		_delay_ms(100);
 		
     }
 }
-
-
-void OneStep(){
-	switch(step_number){
-		case 0:
-		PORTE = 0b00000001;
-		break;
-		
-		case 1:
-		PORTE = 0b00000011;
-		break;
-		
-		case 2:
-		PORTE = 0b00000010;
-		break;
-		
-		case 3:
-		PORTE = 0b00000110;
-		break;
-		
-		case 4:
-		PORTE = 0b00000100;
-		break;
-		
-		case 5:
-		PORTE = 0b00001100;
-		break;
-		
-		case 6:
-		PORTE = 0b00001000;
-		break;
-		
-		case 7:
-		PORTE = 0b00001001;
-		break;
-		
-		default:
-		PORTE = 0b00000000;
-		break;
-	}
-		 
-	if(dir_stepper_motor == CLOCKWISE){
-		step_number++;
-	} else{
-		step_number--;
-	}
-
-	if(step_number > 7){
-		step_number = 0;
-	}
-	if(step_number < 0){
-		step_number = 7;
-	}
-	_delay_ms(1);
-}
-
 
 
