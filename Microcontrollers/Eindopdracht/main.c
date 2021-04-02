@@ -12,6 +12,9 @@
 #define STEPPER_PIN2 5
 #define STEPPER_PIN3 6
 #define STEPPER_PIN4 7
+#define LEFT 2 //pin 2
+#define RIGHT 1 // pin 1
+#define SONAR 0 //pin 0
 
 int step_number = 0;
 enum direction_stepper_moter {CLOCKWISE, COUNTER_CLOCKWISE};
@@ -104,18 +107,19 @@ void OneStep();
 int main(void)
 {
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
-	DDRE = 0xFF;
-	//DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
-	//
-	//EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
-	//
-	//EIMSK |= 0x01; // enable interrupt on pin 0 (INT0)
-	//
-	//TCCR1A = 0b00000000; // initialize timer1, prescaler=256
-	//TCCR1B = 0b00001100; // CTC compare A, RUN
-	//
-	//sei(); // turn on interrupt system
+	DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
 	
+	EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
+	
+	EIMSK |= 0x01; // enable interrupt on pin 0 (INT0)
+	
+	TCCR1A = 0b00000000; // initialize timer1, prescaler=256
+	TCCR1B = 0b00001100; // CTC compare A, RUN
+	
+	sei(); // turn on interrupt system
+	
+	
+	spi_masterInit();
 	_delay_ms(50);
 	
 	init_4bits_mode();
@@ -133,11 +137,35 @@ int main(void)
 		_delay_ms(1);
 	}
 
-
+	int isSonarActive = 0;
     while (1) 
     {
-		//OneStep();
-		_delay_ms(100);
+		if(PINF & BIT(SONAR)){
+			if(isSonarActive){
+				//TODO deactivate sonar
+				isSonarActive = 0;
+			}
+			else{
+				//TODO activate sonar
+				isSonarActive = 1
+			}
+		}
+		
+		if(PINF & BIT(LEFT)){
+			//TODO rotate to left
+		}
+		
+		if(PINF & BIT(RIGHT)){
+			//TODO rotate to right
+		}
+		
+		if(isSonarActive){
+			ultrasonic_measurement();
+		}
+		else{
+			lcd_write_string("Sonar is off");
+		}
+		
     }
 }
 
