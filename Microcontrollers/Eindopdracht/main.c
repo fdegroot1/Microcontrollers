@@ -145,17 +145,11 @@ void ultrasonic_measurement(){
 	wait_ms(200);
 }
 
-void write_int_lcd(int number){
-	int length = snprintf(NULL, 0, "%d", number);
-	char str[length + 1];
-	snprintf(str, length + 1, "%d", number);
-	lcd_write_string(str);
-}
-
 int main(void)
 {
 	DDRG = 0xFF; // port g all output. pin 0 is trig, the rest is for debug
 	DDRD = 0x00; // port D pin 0 on input. 0 is echo and also interrupt
+	DDRE = 0xFF;
 	
 	EICRA = 0x03; // interrupt PORTD on pin 0, rising edge
 	
@@ -180,25 +174,30 @@ int main(void)
     {
 		if(PINF & BIT(SONAR)){
 			if(isSonarActive){
-				//TODO deactivate sonar
 				isSonarActive = 0;
 			}
 			else{
-				//TODO activate sonar
 				isSonarActive = 1;
 			}
 		}
 		
 		if(PINF & BIT(LEFT)){
-			//TODO rotate to left
-			OneStep();
-			_delay_ms(1);
+			dir_stepper_motor = COUNTER_CLOCKWISE;
+			for (int i=0; i<114; i++)
+			{
+				OneStep();
+				_delay_ms(1);
+			}
 		}
 		
 		if(PINF & BIT(RIGHT)){
 			//TODO rotate to right
-			OneStep();
-			_delay_ms(1);
+			dir_stepper_motor = CLOCKWISE;
+			for (int i=0; i<114; i++)
+			{
+				OneStep();
+				_delay_ms(1);
+			}
 		}
 		
 		if(isSonarActive){
